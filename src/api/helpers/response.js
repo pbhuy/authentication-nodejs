@@ -1,8 +1,8 @@
 const send = (res, status, data, message) => {
     return res.status(status).json({
         success: true,
-        data,
-        message
+        message,
+        data
     })
 }
 
