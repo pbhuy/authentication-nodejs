@@ -2,7 +2,7 @@ const Joi = require('joi')
 
 const schemas = {
     id_schema: Joi.object().keys({
-        _id: Joi.string()
+        id: Joi.string()
             .regex(/^[0-9a-fA-F]{24}$/)
             .required()
     }),

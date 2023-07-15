@@ -6,7 +6,7 @@ const dotenv = require('dotenv')
 const cors = require('cors')
 const msg = require('../src/api/helpers/constants')
 const { sendError } = require('../src/api/helpers/response')
-const RequestError = require('../src/api/helpers/error')
+const ResponseError = require('../src/api/helpers/error')
 const router = require('../src/api/routes')
 const connectToMongoDB = require('./configs/connection')
 
@@ -35,16 +35,19 @@ app.use('/api/v1', router)
 
 // 404 Not Found Error
 app.use((req, res, next) => {
-    const error = new RequestError(404, msg.NOT_FOUND)
+    const error = new ResponseError(404, msg.NOT_FOUND)
     next(error)
 })
 
 // 500 Internal Server Error
 app.use((err, req, res, next) => {
-    const error = new RequestError(
-        err.status || 500,
-        err.message || msg.SERVER_ERROR
-    )
+    let error = null
+    if (!err)
+        error = new ResponseError(
+            err.status || 500,
+            err.message || msg.SERVER_ERROR
+        )
+    else error = err
     sendError(res, error)
 })
 
