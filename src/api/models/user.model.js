@@ -1,13 +1,15 @@
 const mongoose = require('mongoose')
+const bcrypt = require('bcrypt')
+const saltRounds = 10
 const Schema = mongoose.Schema
 
 const userSchema = new Schema(
     {
-        firstname: {
+        first_name: {
             type: String,
             required: true
         },
-        lastname: {
+        last_name: {
             type: String,
             required: true
         },
@@ -19,9 +21,30 @@ const userSchema = new Schema(
         password: {
             type: String,
             required: true
+        },
+        imageURL: String,
+        address: String,
+        phone: String,
+        role: {
+            type: String,
+            enum: ['user', 'admin'],
+            default: 'user'
         }
     },
     { timestamps: true }
 )
+
+userSchema.pre('save', async function (next) {
+    try {
+        const salt = await bcrypt.genSalt(saltRounds)
+        this.password = await bcrypt.hash(this.password, salt)
+        next()
+    } catch (error) {
+        next(error)
+    }
+})
+
+// userSchema.methods.verifyPassword =
+
 const User = mongoose.model('user', userSchema)
 module.exports = User
