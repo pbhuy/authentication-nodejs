@@ -41,14 +41,11 @@ app.use((req, res, next) => {
 
 // 500 Internal Server Error
 app.use((err, req, res, next) => {
-    let error = null
-    if (!err)
-        error = new ResponseError(
-            err.status || 500,
-            err.message || msg.SERVER_ERROR
-        )
-    else error = err
-    sendError(res, error)
+    const status = !err.status ? 500 : err.status
+    const message = !err.message ? msg.SERVER_ERROR : err.message
+    if (!err) err = new ResponseError(status, message)
+    else if (!err.status) err.status = status
+    sendError(res, err)
 })
 
 module.exports = app

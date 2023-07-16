@@ -3,6 +3,7 @@ const { send, sendError } = require('../helpers/response')
 const ResponseError = require('../helpers/error')
 const schemas = require('../validations/schemas')
 const msg = require('../helpers/constants')
+const { encodedToken, decodedToken } = require('../helpers/token')
 
 const getUsers = async (req, res, next) => {
     try {
@@ -17,6 +18,7 @@ const getUserByID = async (req, res, next) => {
     try {
         const _id = req.params.id
         const user = await User.findById(_id)
+        if (!user) return next()
         send(res, 200, user)
     } catch (error) {
         next(error)
@@ -26,6 +28,7 @@ const getUserByID = async (req, res, next) => {
 const createUser = async (req, res, next) => {
     try {
         const user = new User(req.body)
+        if (!user) return next()
         await user.save()
         send(res, 201, user)
     } catch (error) {
@@ -36,7 +39,7 @@ const createUser = async (req, res, next) => {
 const signUp = async (req, res, next) => {
     try {
         const user = new User(req.body)
-        // check email is exist
+        // check if email is exist
         const found_user = await User.findOne({ email: user.email })
         if (found_user) {
             return next(new ResponseError(409, msg.EXIST_CREDENTIALS))
@@ -52,12 +55,19 @@ const signIn = async (req, res, next) => {
     try {
         const { email, password } = req.body
         const user = await User.findOne({ email })
-        if (!user) sendError(res, new ResponseError(409, msg.EXIST_CREDENTIALS))
-        const isValid = await user.verifyPassword(password)
-        if (!isValid)
-            sendError(res, new ResponseError(403, msg.INVALID_CREDENTIALS))
-
-        send(res, 201, user, 'Sign in successfully')
+        // check if email is found
+        if (!user) sendError(res, new ResponseError(400, msg.EMAIL_NOT_EXIST))
+        else {
+            // check if password is verified
+            const isValid = await user.verifyPassword(password)
+            if (!isValid)
+                sendError(res, new ResponseError(403, msg.INVALID_CREDENTIALS))
+            else {
+                const token = encodedToken(user)
+                res.setHeader('Authorization', token)
+                send(res, 200, user, 'Sign in successfully')
+            }
+        }
     } catch (error) {
         next(error)
     }
@@ -89,7 +99,7 @@ const deleteUser = async (req, res, next) => {
 const deleteAllUsers = async (req, res, next) => {
     try {
         await User.deleteMany({})
-        send(res, 200, undefined, 'Delete all users successfully')
+        send(res, 204)
     } catch (error) {
         next(error)
     }

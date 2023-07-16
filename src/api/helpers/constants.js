@@ -1,10 +1,8 @@
-const API_VERSION = 'v1'
-
 const message = {
     SERVER_ERROR:
         'Oops, something Went Wrong! Our team are working hard to fix the issue.',
 
-    NOT_FOUND: `Not Found. Use /api/${API_VERSION} to access the api resource`,
+    NOT_FOUND: `Not Found`,
 
     RESOURCE_FOUND: 'Resource(s) found',
 
@@ -23,7 +21,9 @@ const message = {
 
     EXIST_CREDENTIALS: 'Email is already in use.',
 
-    ACCESS_DENIED: 'Access denied!'
+    ACCESS_DENIED: 'Access denied!',
+
+    EMAIL_NOT_EXIST: 'Email does not exist'
 }
 
 module.exports = message

@@ -1,5 +1,6 @@
 const userRoute = require('express').Router()
 const userController = require('../controllers/user.controller')
+const { verifyToken } = require('../middlewares/auth')
 const { validateParams, validateBody } = require('../middlewares/validator')
 const schemas = require('../validations/schemas')
 
@@ -12,7 +13,11 @@ userRoute
     .get('/', userController.getUsers)
     .post('/', validateBody(schemas.user_schema), userController.createUser)
     .post('/signup', validateBody(schemas.user_schema), userController.signUp)
-    .post('/signin', userController.signIn)
+    .post(
+        '/signin',
+        validateBody(schemas.user_login_schema),
+        userController.signIn
+    )
     .put(
         '/:id',
         validateParams(schemas.id_schema, 'id'),
@@ -25,6 +30,6 @@ userRoute
         validateParams(schemas.id_schema, 'id'),
         userController.deleteUser
     )
-    .delete('/', userController.deleteAllUsers)
+    .delete('/', verifyToken, userController.deleteAllUsers)
 
 module.exports = userRoute
