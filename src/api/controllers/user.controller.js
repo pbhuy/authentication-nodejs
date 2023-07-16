@@ -61,7 +61,7 @@ const signIn = async (req, res, next) => {
             // check if password is verified
             const isValid = await user.verifyPassword(password)
             if (!isValid)
-                sendError(res, new ResponseError(403, msg.INVALID_CREDENTIALS))
+                sendError(res, new ResponseError(401, msg.INVALID_CREDENTIALS))
             else {
                 const token = encodedToken(user)
                 res.setHeader('Authorization', token)
@@ -75,8 +75,12 @@ const signIn = async (req, res, next) => {
 
 const updateUser = async (req, res, next) => {
     try {
-        const _id = req.params.id
+        const _id = req.id
         const new_user = req.body
+        const imageURL = req.file
+            ? `http://localhost:3000/images/${req.file.filename}`
+            : undefined
+        new_user.imageURL = imageURL
         const user = await User.findOneAndUpdate({ _id }, new_user, {
             new: true
         })

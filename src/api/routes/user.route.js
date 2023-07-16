@@ -1,8 +1,16 @@
 const userRoute = require('express').Router()
 const userController = require('../controllers/user.controller')
-const { verifyToken } = require('../middlewares/auth')
+const {
+    verifyTokenAndAuthorize,
+    verifyTokenAndAdmin,
+    verifyToken
+} = require('../middlewares/auth')
 const { validateParams, validateBody } = require('../middlewares/validator')
 const schemas = require('../validations/schemas')
+const multer = require('multer')
+const multerConfig = require('../../configs/multer')
+
+const upload = multer(multerConfig)
 
 userRoute
     .get(
@@ -12,22 +20,28 @@ userRoute
     )
     .get('/', userController.getUsers)
     .post('/', validateBody(schemas.user_schema), userController.createUser)
-    .post('/signup', validateBody(schemas.user_schema), userController.signUp)
+    .post(
+        '/signup',
+        validateBody(schemas.user_signup_schema),
+        userController.signUp
+    )
     .post(
         '/signin',
-        validateBody(schemas.user_login_schema),
+        validateBody(schemas.user_signin_schema),
         userController.signIn
     )
     .put(
-        '/:id',
-        validateParams(schemas.id_schema, 'id'),
-        validateBody(schemas.user_schema),
+        '/',
+        validateBody(schemas.user_update_schema),
+        verifyTokenAndAuthorize,
+        upload.single('imageURL'),
         userController.updateUser
     )
     .patch('/reset', userController.resetPassword)
     .delete(
         '/:id',
         validateParams(schemas.id_schema, 'id'),
+        verifyTokenAndAdmin,
         userController.deleteUser
     )
     .delete('/', verifyToken, userController.deleteAllUsers)
