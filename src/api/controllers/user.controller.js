@@ -111,8 +111,22 @@ const deleteAllUsers = async (req, res, next) => {
 
 const resetPassword = async (req, res, next) => {
     try {
-        await User.deleteMany({})
-        send(res, 200, undefined, 'Delete all users successfully')
+        const { password } = req.body
+        const token = req.headers.authorization.split(' ')[1]
+        const decode = decodedToken(token)
+        const user = await User.findById(decode.id)
+        user.password = password
+        await user.save()
+        send(res, 200, user, 'Reset password successfully')
+    } catch (error) {
+        next(error)
+    }
+}
+
+const forgetPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body
+        send(res, 200, email, 'Forget password successfully')
     } catch (error) {
         next(error)
     }
@@ -127,5 +141,6 @@ module.exports = {
     updateUser,
     deleteUser,
     deleteAllUsers,
-    resetPassword
+    resetPassword,
+    forgetPassword
 }

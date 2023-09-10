@@ -11,7 +11,7 @@ const router = require('../src/api/routes')
 const connectToMongoDB = require('./configs/database')
 const path = require('path')
 
-// Environment variables
+// Environment Variables
 dotenv.config()
 
 // CONNECT MONGODB
@@ -22,20 +22,20 @@ app.use('/images', express.static(path.join(__dirname, 'uploads')))
 
 // MIDDLEWARES
 
-// json parser
+// Json Parser
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 
-// morgan
+// Logger
 app.use(morgan('dev'))
 
-// cors
+// Cors
 app.use(cors({ credentials: true }))
 
-// ROUTES
+// Routes
 app.use('/api/v1', router)
 
-// HANDLE ERROR
+// ERRORS HANDLER
 
 // 404 Not Found Error
 app.use((req, res, next) => {

@@ -30,6 +30,7 @@ userRoute
         validateBody(schemas.user_signin_schema),
         userController.signIn
     )
+    .post('/forget', userController.forgetPassword)
     .put(
         '/',
         validateBody(schemas.user_update_schema),
